@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robotic Animated Face</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .face {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      border-radius: 10%;
+      background-color: #4CAF50; /* Green */
+      overflow: hidden;
+      transform-origin: center;
+    }
+
+    .eye {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background-color: #2196F3; /* Blue */
+      border-radius: 50%;
+      top: 40px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .pupil {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #000;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .mouth {
+      position: absolute;
+      width: 100px;
+      height: 20px;
+      background-color: #FF9800; /* Orange */
+      top: 120px;
+      left: 50px;
+      transform-origin: 50% 0;
+      animation: openMouth 2s infinite alternate;
+    }
+
+    .antenna {
+      position: absolute;
+      width: 10px;
+      height: 80px;
+      background-color: #FFC107; /* Yellow */
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    @keyframes openMouth {
+      0%, 100% {
+        transform: scaleY(1);
+      }
+      50% {
+        transform: scaleY(0.5);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="face" id="robotFace">
+  <div class="eye" id="leftEye">
+    <div class="pupil" id="leftPupil"></div>
+  </div>
+  <div class="eye" id="rightEye" style="left: 130px;">
+    <div class="pupil" id="rightPupil"></div>
+  </div>
+  <div class="mouth"></div>
+  <div class="antenna"></div>
+
+  <script>
+    const robotFace = document.getElementById('robotFace');
+    const leftEye = document.getElementById('leftEye');
+    const rightEye = document.getElementById('rightEye');
+    const leftPupil = document.getElementById('leftPupil');
+    const rightPupil = document.getElementById('rightPupil');
+
+    robotFace.addEventListener('mousemove', (e) => {
+      const { left: faceLeft, top: faceTop, width: faceWidth, height: faceHeight } = robotFace.getBoundingClientRect();
+      const { width: eyeWidth, height: eyeHeight } = leftEye.getBoundingClientRect();
+
+      const faceCenterX = faceLeft + faceWidth / 2;
+      const faceCenterY = faceTop + faceHeight / 2;
+
+      moveEye(leftEye, leftPupil, faceCenterX, faceCenterY, eyeWidth, eyeHeight, e.clientX, e.clientY);
+      moveEye(rightEye, rightPupil, faceCenterX, faceCenterY, eyeWidth, eyeHeight, e.clientX, e.clientY);
+    });
+
+    function moveEye(eye, pupil, faceCenterX, faceCenterY, eyeWidth, eyeHeight, mouseX, mouseY) {
+      const eyeCenterX = eye.offsetLeft + eyeWidth / 2;
+      const eyeCenterY = eye.offsetTop + eyeHeight / 2;
+
+      const deltaX = mouseX - faceCenterX;
+      const deltaY = mouseY - faceCenterY;
+
+      const angle = Math.atan2(deltaY, deltaX);
+      const distance = Math.min(faceWidth / 4, faceHeight / 4);
+
+      const offsetX = Math.cos(angle) * distance;
+      const offsetY = Math.sin(angle) * distance;
+
+      const maxOffsetX = (eyeWidth - pupil.offsetWidth) / 2;
+      const maxOffsetY = (eyeHeight - pupil.offsetHeight) / 2;
+
+      pupil.style.transform = `translate(-50%, -50%) translate(${Math.min(maxOffsetX, Math.max(-maxOffsetX, offsetX))}px, ${Math.min(maxOffsetY, Math.max(-maxOffsetY, offsetY))}px) rotate(0deg)`;
+    }
+  </script>
+</div>
+
+</body>
+</html>

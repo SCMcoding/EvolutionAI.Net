@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            color: white;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #calendar-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #calendar {
+            width: 300px;
+            height: 300px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: pulse 2s infinite;
+            z-index: 2;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+        }
+
+        #patterns-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Animated Patterns */
+        .pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .pattern1 {
+            background: repeating-linear-gradient(-45deg, transparent, transparent 5px, rgba(255, 255, 255, 0.1) 5px, rgba(255, 255, 255, 0.1) 10px);
+            animation: movePattern 30s linear infinite;
+        }
+
+        .pattern2 {
+            background: repeating-radial-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05) 5px, transparent 5px, transparent 10px);
+            animation: rotatePattern 45s linear infinite;
+        }
+
+        @keyframes movePattern {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(100%, 100%);
+            }
+        }
+
+        @keyframes rotatePattern {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Animated Stars */
+        .animated-star {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            opacity: 0;
+            animation: twinkling 2s infinite, moveShootingStar 10s linear infinite;
+        }
+
+        .animated-star.large {
+            width: 4px;
+            height: 4px;
+        }
+
+        .animated-star.medium {
+            width: 3px;
+            height: 3px;
+        }
+
+        @keyframes twinkling {
+            0%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes moveShootingStar {
+            from {
+                transform: translateX(-100vw);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100vw);
+                opacity: 0;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <title>Space Calendar</title>
+</head>
+<body>
+    <div id="calendar-container">
+        <div id="patterns-container">
+            <!-- Animated Patterns -->
+            <div class="pattern pattern1"></div>
+            <div class="pattern pattern2"></div>
+        </div>
+        <div id="calendar"></div>
+        <!-- Animated Stars -->
+        <script>
+            function createStars() {
+                const starsContainer = document.getElementById('patterns-container');
+                const totalStars = 1000;
+
+                for (let i = 0; i < totalStars; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'animated-star';
+                    const randomSize = Math.floor(Math.random() * 3) + 1; // Random size between 1 and 3
+                    star.classList.add(randomSize === 1 ? 'small' : (randomSize === 2 ? 'medium' : 'large'));
+                    const randomPositionX = Math.random() * 100;
+                    const randomPositionY = Math.random() * 100;
+                    star.style.top = `${randomPositionY}%`;
+                    star.style.left = `${randomPositionX}%`;
+
+                    const randomTwinkleDuration = Math.floor(Math.random() * 6) + 2; // Random duration between 2 and 8 seconds
+                    const randomTwinkleDelay = Math.floor(Math.random() * 6) + 1; // Random delay between 1 and 7 seconds
+                    star.style.animationDuration = `twinkling ${randomTwinkleDuration}s infinite`;
+                    star.style.animationDelay = `-${randomTwinkleDelay}s`;
+
+                    starsContainer.appendChild(star);
+                }
+            }
+
+            createStars();
+        </script>
+    </div>
+    <script>
+        function updateCalendar() {
+            const calendar = document.getElementById('calendar');
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            calendar.innerText = now.toLocaleDateString('en-US', options);
+        }
+
+        function setBackgroundBasedOnTime() {
+            const calendarContainer = document.getElementById('calendar-container');
+            const hours = new Date().getHours();
+
+            // Check if it's night or day and set background color accordingly
+            if (hours >= 6 && hours < 18) {
+                // Daytime (blue background)
+                calendarContainer.style.background = 'radial-gradient(circle, #66c2ff 0%, #001235 100%)';
+            } else {
+                // Nighttime (black background)
+                calendarContainer.style.background = 'radial-gradient(circle, #000000 0%, #001235 100%)';
+            }
+        }
+
+        function animateBackground() {
+            const colors = ['#001235', '#00244a', '#004c8e', '#0073d4', '#00a7ff'];
+            let currentColorIndex = 0;
+
+            function changeColor() {
+                setBackgroundBasedOnTime();
+                currentColorIndex = (currentColorIndex + 1) % colors.length;
+            }
+
+            setInterval(changeColor, 3000);
+        }
+
+        function connectStars() {
+            const particlesJSContainer = document.getElementById('patterns-container');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = particlesJSContainer.clientWidth;
+            canvas.height = particlesJSContainer.clientHeight;
+            canvas.style.pointerEvents = 'none';
+
+            particlesJSContainer.appendChild(canvas);
+
+            window.addEventListener('resize', () => {
+                canvas.width = particlesJSContainer.clientWidth;
+                canvas.height = particlesJSContainer.clientHeight;
+            });
+
+            function drawLine(p1, p2) {
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.stroke();
+            }
+
+            function animateLines() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const particles = window.pJSDom[0].pJS.particles.array;
+
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const distance = Math.sqrt(
+                            Math.pow(particles[i].pos_x - particles[j].pos_x, 2) +
+                            Math.pow(particles[i].pos_y - particles[j].pos_y, 2)
+                        );
+
+                        if (distance < 120) {
+                            drawLine({
+                                x: particles[i].pos_x,
+                                y: particles[i].pos_y
+                            }, {
+                                x: particles[j].pos_x,
+                                y: particles[j].pos_y
+                            });
+                        }
+                    }
+                }
+
+                requestAnimationFrame(animateLines);
+            }
+
+            animateLines();
+        }
+
+        updateCalendar();
+        setBackgroundBasedOnTime(); // Set initial background based on time
+        animateBackground();
+        connectStars(); // Connect the stars with lines
+        setInterval(updateCalendar, 1000); // Update every second
+    </script>
+</body>
+</html>

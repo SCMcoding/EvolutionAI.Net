@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Robotic Face</title>
+  <style>
+    body {
+      font-family: "Cursive", sans-serif;background-color: #2b2b2b;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 80vh;
+      margin: 0;
+    }
+
+    .head {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background-color: #495057;
+      overflow: hidden;
+    }
+
+    .eye {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background-color: #ced4da;
+      border-radius: 50%;
+      top: 40px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .pupil {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background-color: #000;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 0.2s;
+    }
+
+    .mouth {
+      position: absolute;
+      width: 120px;
+      height: 20px;
+      background-color: #ff9900;
+      top: 120px;
+      left: 40px;
+      transform-origin: 50% 0;
+      animation: openMouth 2s infinite alternate;
+    }
+
+    .antenna {
+      position: absolute;
+      width: 10px;
+      height: 60px;
+      background-color: #e9ecef;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .ear {
+      position: absolute;
+      width: 30px;
+      height: 60px;
+      background-color: #ced4da;
+      border-radius: 10px;
+      top: 50px;
+    }
+
+    #wordDisplay {
+      position: absolute;
+      top: 260px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #fff;
+      font-size: 18px;
+    }
+
+    @keyframes openMouth {
+      0%, 100% {
+        transform: scaleY(1);
+      }
+      50% {
+        transform: scaleY(0.5);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="head">
+  <div class="eye" style="left: 30px;">
+    <div class="pupil" id="leftPupil"></div>
+  </div>
+  <div class="eye" style="left: 110px;">
+    <div class="pupil" id="rightPupil"></div>
+  </div>
+  <div class="mouth"></div>
+  <div class="antenna"></div>
+  <div class="ear" style="left: 10px;"></div>
+  <div class="ear" style="left: 160px;"></div>
+</div>
+
+<div id="wordDisplay">Random Word</div>
+
+<script>
+  var leftPupil = document.getElementById("leftPupil");
+  var rightPupil = document.getElementById("rightPupil");
+  var head = document.querySelector(".head");
+  var wordDisplay = document.getElementById("wordDisplay");
+
+  var words = ["Hello", "Robot", "Interactive", "Web", "Random", "Text"];
+
+  function getRandomWord() {
+    var randomIndex = Math.floor(Math.random() * words.length);
+    return words[randomIndex];
+  }
+
+  function displayRandomWord() {
+    wordDisplay.innerText = getRandomWord();
+  }
+
+  setInterval(displayRandomWord, 3000); // Change word every 3 seconds
+
+  head.addEventListener("mousemove", function(event) {
+    var mouseX = event.clientX;
+    var mouseY = event.clientY;
+    var headRect = head.getBoundingClientRect();
+    var centerX = headRect.left + headRect.width / 2;
+    var centerY = headRect.top + headRect.height / 2;
+
+    var deltaX = mouseX - centerX;
+    var deltaY = mouseY - centerY;
+    var angle = Math.atan2(deltaY, deltaX);
+    var maxRadius = 15;
+
+    // Limit pupil movement within the eye boundaries
+    var eyeRadius = 30; // Eye radius
+    var pupilX = Math.cos(angle) * Math.min(maxRadius, eyeRadius);
+    var pupilY = Math.sin(angle) * Math.min(maxRadius, eyeRadius);
+
+    leftPupil.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+    rightPupil.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+  });
+</script>
+
+</body>
+</html>

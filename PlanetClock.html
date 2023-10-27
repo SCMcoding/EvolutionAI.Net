@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planetary Clock</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: black;
+            color: white;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #digitalClock {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+
+        #timezone {
+            font-size: 16px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="planetaryClockCanvas"></canvas>
+    <div id="digitalClock"></div>
+    <div id="timezone"></div>
+
+    <script>
+        const numStars = 100;
+        const numPlanets = 14;
+        let starX, starY, starSpeed;
+        let planetX, planetY, planetSize, planetSpeed, planetRotation, planetDistance;
+
+        function setup() {
+            const canvas = document.getElementById('planetaryClockCanvas');
+            const ctx = canvas.getContext('2d');
+
+            resizeCanvas(canvas);
+
+            starX = new Array(numStars);
+            starY = new Array(numStars);
+            starSpeed = new Array(numStars);
+
+            planetX = new Array(numPlanets);
+            planetY = new Array(numPlanets);
+            planetSize = new Array(numPlanets);
+            planetSpeed = new Array(numPlanets);
+            planetRotation = new Array(numPlanets);
+            planetDistance = new Array(numPlanets);
+
+            for (let i = 0; i < numStars; i++) {
+                starX[i] = Math.random() * canvas.width;
+                starY[i] = Math.random() * canvas.height;
+                starSpeed[i] = Math.random() * (3 - 1) + 1;
+            }
+
+            for (let i = 0; i < numPlanets; i++) {
+                planetSize[i] = Math.random() * (30 - 10) + 10;
+                planetSpeed[i] = Math.random() * (0.05 - 0.01) + 0.01;
+                planetRotation[i] = Math.random() * Math.PI;
+                planetDistance[i] = 40 + i * 40;
+            }
+
+            window.addEventListener('resize', () => resizeCanvas(canvas));
+
+            setInterval(() => draw(ctx, canvas.width, canvas.height), 16);
+        }
+
+        function resizeCanvas(canvas) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function drawStars(ctx, width, height) {
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'white';
+
+            for (let i = 0; i < numStars; i++) {
+                ctx.beginPath();
+                ctx.arc(starX[i], starY[i], 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                starY[i] += starSpeed[i];
+
+                if (starY[i] > height) {
+                    starY[i] = 0;
+                    starX[i] = Math.random() * width;
+                }
+            }
+        }
+
+        function drawPlanets(ctx, width, height) {
+            ctx.fillStyle = 'white';
+
+            for (let i = 0; i < numPlanets; i++) {
+                planetRotation[i] += planetSpeed[i];
+
+                const planetXNew = width / 2 + Math.cos(planetRotation[i]) * planetDistance[i];
+                const planetYNew = height / 2 + Math.sin(planetRotation[i]) * planetDistance[i];
+
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.beginPath();
+                ctx.ellipse(width / 2, height / 2, planetDistance[i] * 2, planetDistance[i] * 2, 0, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(planetXNew, planetYNew, planetSize[i], 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawClock(ctx, width, height) {
+            const secondsRadius = 100;
+            const minutesRadius = 90;
+            const hoursRadius = 60;
+
+            const now = new Date();
+            const h = now.getHours() % 12 || 12;
+            const m = now.getMinutes();
+            const s = now.getSeconds();
+
+            const sAngle = (s / 60) * Math.PI * 2 - Math.PI / 2;
+            const mAngle = ((m + s / 60) / 60) * Math.PI * 2 - Math.PI / 2;
+            const hAngle = ((h % 12 + m / 60) / 12) * Math.PI * 2 - Math.PI / 2;
+
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 1;
+
+            ctx.beginPath();
+            ctx.moveTo(width / 2, height / 2);
+            ctx.lineTo(width / 2 + Math.cos(sAngle) * secondsRadius, height / 2 + Math.sin(sAngle) * secondsRadius);
+            ctx.stroke();
+
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(width / 2, height / 2);
+            ctx.lineTo(width / 2 + Math.cos(mAngle) * minutesRadius, height / 2 + Math.sin(mAngle) * minutesRadius);
+            ctx.stroke();
+
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(width / 2, height / 2);
+            ctx.lineTo(width / 2 + Math.cos(hAngle) * hoursRadius, height / 2 + Math.sin(hAngle) * hoursRadius);
+            ctx.stroke();
+
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(width / 2, height / 2, 10, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawDigitalClock() {
+            const digitalClock = document.getElementById('digitalClock');
+            const now = new Date();
+            const hours = now.getHours() % 12 || 12;
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+            digitalClock.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)} ${ampm}`;
+        }
+
+        function drawTimeZone() {
+            const timezoneElement = document.getElementById('timezone');
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            timezoneElement.innerText = `Time Zone: ${timezone}`;
+        }
+
+        function draw(ctx, width, height) {
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, width, height);
+
+            drawStars(ctx, width, height);
+            drawPlanets(ctx, width, height);
+            drawClock(ctx, width, height);
+            drawDigitalClock();
+            drawTimeZone();
+        }
+
+        function pad(value) {
+            return value < 10 ? `0${value}` : value;
+        }
+
+        document.addEventListener('DOMContentLoaded', setup);
+    </script>
+</body>
+</html>
